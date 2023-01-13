@@ -1,19 +1,25 @@
 import { useContext } from "react";
 import Button from "react-bootstrap/Button";
+// Importam ce avem nevoie.
 import { removeFromCart } from "../store/Cart/actions";
 import { CartContext } from "../store/Cart/context";
+import { ThemeContext } from "../store/Theme/context";
 
 export function Cart() {
+  // Extragem state-ul si dispatch-ul asociate cart-ului.
   const { cartState, cartDispatch } = useContext(CartContext);
+  const { themeState } = useContext(ThemeContext);
 
   function handleCartRemove(id) {
+    // Apelam actiunea, cu payload-ul aferent.
     const actionResult = removeFromCart(id);
-
+    // Trimitem rezultatul actiunii catre reducer.
     cartDispatch(actionResult);
   }
 
   return (
-    <div>
+    <div className={themeState.theme === "light" ? "bg-white" : "bg-dark"}>
+      {/* Afisam continutul state-ului cart-ului pe ecran. */}
       {cartState.products.length === 0 ? (
         <p>Nu ai produse in cos.</p>
       ) : (
@@ -29,6 +35,7 @@ export function Cart() {
               </div>
               <Button
                 variant="danger"
+                // La click pe buton, apelam functia ce va declansa modificarea state-ului.
                 onClick={() => handleCartRemove(product.id)}
               >
                 Sterge din cos

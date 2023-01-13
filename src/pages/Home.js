@@ -7,9 +7,15 @@ import { Link } from "react-router-dom";
 import { CartContext } from "../store/Cart/context";
 // Importam actiunea de adaugare in cart.
 import { addToCart } from "../store/Cart/actions";
+import { ThemeContext } from "../store/Theme/context";
+import { setDarkTheme, setLightTheme } from "../store/Theme/actions";
 
 export function Home() {
-  // Cerem 4 produse de la API si actualizam state-ul.
+  // Vom modifica state-ul cart-ului, deci avem nevoie de dispatch.
+  const { cartDispatch } = useContext(CartContext);
+  // Vom accesa si modifica state-ul temei, deci avem nevoie si de state si de dispatch.
+  const { themeState, themeDispatch } = useContext(ThemeContext);
+
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
@@ -22,9 +28,6 @@ export function Home() {
       });
   }, []);
 
-  // Utilizam valoarea oferita de context.
-  const { cartDispatch } = useContext(CartContext);
-
   // Functia care se ocupa de adaugarea in cart a produsului:
   function handleAddToCartClick(product) {
     // Apelam actiunea, cu payloadul aferent.
@@ -33,9 +36,33 @@ export function Home() {
     cartDispatch(actionResult);
   }
 
+  // Cand dam click pe butonul de schimbare a temei, in functie de valoarea temei, declansam actiunea corespunzatoare.
+  function handleThemeChange() {
+    let actionResult;
+    if (themeState.theme === "light") {
+      // Daca tema este light, declansam actiunea ce seteaza tema dark.
+      actionResult = setDarkTheme();
+    } else {
+      // Daca tema este dark, declansam actiunea ce seteaza tema light.
+      actionResult = setLightTheme();
+    }
+
+    themeDispatch(actionResult);
+  }
+
   return (
-    <div>
+    <div className={themeState.theme === "light" ? "bg-white" : "bg-dark"}>
       <div className="d-flex flex-column align-items-center">
+        {/* Atasam butonului  */}
+        <Button
+          variant="outline-primary"
+          className="mt-3"
+          // Atasam functia care va schimba state-ul global al temei.
+          onClick={handleThemeChange}
+        >
+          Change theme
+        </Button>
+        {/* Afisam produsele din cart. */}
         {products.map((product) => {
           return (
             <Card

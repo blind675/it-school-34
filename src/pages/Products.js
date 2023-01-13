@@ -1,11 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import { Link } from "react-router-dom";
+import { addToCart } from "../store/Cart/actions";
+import { CartContext } from "../store/Cart/context";
 
 export function Products() {
   // Luam produse de la API si actualizam state-ul.
   const [products, setProducts] = useState([]);
+  // Vom modifica state-ul cart-ului, deci avem nevoie de dispatch.
+  const { cartDispatch } = useContext(CartContext);
+
   useEffect(() => {
     fetch("https://www.cheapshark.com/api/1.0/deals")
       .then((response) => response.json())
@@ -13,6 +18,14 @@ export function Products() {
         setProducts(products);
       });
   }, []);
+
+  // Functia care se ocupa de adaugarea in cart a produsului:
+  function handleAddToCartClick(product) {
+    // Apelam actiunea, cu payloadul aferent.
+    const actionResult = addToCart(product);
+    // Trimitem rezultatul actiunii catre reducer.
+    cartDispatch(actionResult);
+  }
 
   return (
     <div>
@@ -39,7 +52,20 @@ export function Products() {
                   </Card.Text>
                 </Card.Body>
               </Link>
-              <Button variant="success">Adaugă în coș</Button>
+              <Button
+                variant="success"
+                onClick={() => {
+                  // Construim payload-ul si il pasam ca argument functiei care va apela actiunea addToCart.
+                  handleAddToCartClick({
+                    id: product.dealID,
+                    image: product.thumb,
+                    name: product.title,
+                    price: product.salePrice,
+                  });
+                }}
+              >
+                Adaugă în coș
+              </Button>
             </Card>
           );
         })}

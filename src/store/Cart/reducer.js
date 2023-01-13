@@ -19,6 +19,7 @@ export function cartReducer(state, action) {
       });
 
       if (!foundProduct) {
+        // Fiind prima data cand un produs este adaugat in cart, are cantitatea 1.
         newProduct.quantity = 1;
 
         const newState = {
@@ -27,10 +28,15 @@ export function cartReducer(state, action) {
 
         return newState;
       } else {
+        // Este nevoie sa modificam cantitatea FARA sa modificam array-ul initial.
+        // Astfel, folosim un map.
         const updatedProducts = previousProducts.map((product) => {
+          // Daca produsul este cel cautat, returnam un nou produs, care contine campurile produsului anterior, dar cu cantitatea modificata.
           if (product.id === newProduct.id) {
             return {
+              // Continutul produsului din state-ul anterior.
               ...product,
+              // Cantitatea produsului din state-ul anterior + 1.
               quantity: product.quantity + 1,
             };
           }
@@ -38,7 +44,7 @@ export function cartReducer(state, action) {
           return product;
         });
 
-        // Generam noul state.
+        // Cream noul state, ce contine produsele actualizate.
         const newState = {
           products: [...updatedProducts],
         };
@@ -48,7 +54,13 @@ export function cartReducer(state, action) {
     }
 
     case "REMOVE_FROM_CART": {
-      const newState = { products: [] };
+      // Pentru a șterge produsele, filtram produsele din state, excuzandu-l pe cel care are id-ul venit din payload.
+      const filteredProducts = state.products.filter((product) => {
+        return product.id !== action.payload;
+      });
+
+      // State-ul nou va contine produsele filtrate.
+      const newState = { products: filteredProducts };
       return newState;
     }
     // Nu uitam sa returnam state-ul pe cazul default
